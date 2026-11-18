@@ -41,7 +41,7 @@ def create_integrated_docx(output_path):
     meta_rows = [
         ("Student Name: Luis James Tesoro", "Student ID: 554639"),
         ("Course & Section: BSIT — 2nd Year - 4745 (CCE106L)", "Date: November 18, 2026"),
-        ("Project: social_media (Integrated Flutter App)", "GitHub: https://github.com/tesoro554639/social_media")
+        ("Project: ROOM ACT 7: INTEGRATED FLUTTER STUDENT APPLICATION", "GitHub: https://github.com/tesoro554639/ROOM-ACT-7-INTEGRATED-FLUTTER-STUDENT-APPLICATION")
     ]
     for row_idx, (c0, c1) in enumerate(meta_rows):
         row = table_meta.rows[row_idx]

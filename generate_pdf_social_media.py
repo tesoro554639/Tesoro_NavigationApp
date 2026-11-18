@@ -141,7 +141,7 @@ def create_integrated_pdf(output_pdf_path):
         ],
         [
             Paragraph("<b>Project:</b> social_media (Integrated Flutter App)", body_style),
-            Paragraph("<b>GitHub:</b> https://github.com/tesoro554639/social_media", body_style),
+            Paragraph("<b>GitHub:</b> https://github.com/tesoro554639/ROOM-ACT-7-INTEGRATED-FLUTTER-STUDENT-APPLICATION", body_style),
         ]
     ]
     t_meta = Table(meta_data, colWidths=[290, 250])
