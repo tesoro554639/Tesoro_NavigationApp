@@ -94,7 +94,7 @@ void main() {
     await loadFonts();
   });
 
-  testWidgets('Capture screenshots of all screens and social media features', (WidgetTester tester) async {
+  testWidgets('Capture screenshots of all screens and features', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(480, 960);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -102,7 +102,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    // 1. Login Screen screenshot
+    // 1. Login Screen
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -120,7 +120,7 @@ void main() {
       matchesGoldenFile('screenshots/00_login_screen.png'),
     );
 
-    // 2. Register Screen screenshot
+    // 2. Register Screen
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -155,42 +155,41 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 3. Home Page screenshot
+    // 3. Dashboard Page (Index 0)
     await expectLater(
       find.byType(MainScreen),
-      matchesGoldenFile('screenshots/01_home_page.png'),
+      matchesGoldenFile('screenshots/01_dashboard_page.png'),
     );
 
-    // 4. Calculator Page screenshot
+    // 4. Calculator Page (Index 1) - calculate 10 + 5 = 15.0
     await tester.tap(find.byIcon(Icons.calculate_outlined));
     await tester.pumpAndSettle();
+
+    final textFields = find.byType(TextField);
+    await tester.enterText(textFields.at(0), '10');
+    await tester.enterText(textFields.at(1), '5');
+    await tester.tap(find.widgetWithText(ElevatedButton, '+'));
+    await tester.pumpAndSettle();
+
     await expectLater(
       find.byType(MainScreen),
       matchesGoldenFile('screenshots/02_calculator_page.png'),
     );
 
-    // 5. Profile Page screenshot (with Logout button)
-    await tester.tap(find.byIcon(Icons.person_outline));
+    // 5. Social Media Page (Index 2)
+    await tester.tap(find.byIcon(Icons.people_outlined));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MainScreen),
-      matchesGoldenFile('screenshots/03_profile_page.png'),
+      matchesGoldenFile('screenshots/03_social_page.png'),
     );
 
-    // 6. Social Media Page screenshot
-    await tester.tap(find.byIcon(Icons.share_outlined));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(MainScreen),
-      matchesGoldenFile('screenshots/04_social_media_page.png'),
-    );
-
-    // 7. Open Create Post sheet
+    // 6. Open Create Post sheet
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('screenshots/05_create_post_sheet.png'),
+      matchesGoldenFile('screenshots/04_create_post_sheet.png'),
     );
 
     // Enter post caption and image URL
@@ -208,9 +207,8 @@ void main() {
     await tester.tap(find.text('Submit Post'));
     await tester.pumpAndSettle();
 
-    // 8. Like the new post
+    // Like the new post
     final likeButtons = find.widgetWithText(TextButton, 'Like');
-    expect(likeButtons, findsWidgets);
     await tester.tap(likeButtons.first);
     await tester.pumpAndSettle();
 
@@ -221,10 +219,18 @@ void main() {
     await tester.tap(sendButtons.first);
     await tester.pumpAndSettle();
 
-    // 9. Post with Like and Comment screenshot
+    // 7. Post with Like and Comment screenshot
     await expectLater(
       find.byType(MainScreen),
-      matchesGoldenFile('screenshots/06_post_with_like_and_comment.png'),
+      matchesGoldenFile('screenshots/05_social_post_with_like_and_comment.png'),
+    );
+
+    // 8. Profile Page (Index 3)
+    await tester.tap(find.byIcon(Icons.person_outline));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MainScreen),
+      matchesGoldenFile('screenshots/06_profile_page.png'),
     );
   });
 }

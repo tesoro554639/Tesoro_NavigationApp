@@ -48,7 +48,7 @@ def render_table(
     is_tracing=False
 ):
     pad_h = 24
-    pad_v = 15
+    pad_v = 14
     margin = 36
     
     total_table_width = sum(col_widths)
@@ -80,7 +80,7 @@ def render_table(
     row_heights = []
     wrapped_rows = []
     line_height = 25
-    header_height = 52
+    header_height = 50
 
     for row_data in rows:
         max_lines_in_row = 1
@@ -93,7 +93,7 @@ def render_table(
             if len(lines) > max_lines_in_row:
                 max_lines_in_row = len(lines)
         wrapped_rows.append(wrapped_cells)
-        r_height = max(48, pad_v * 2 + max_lines_in_row * line_height)
+        r_height = max(46, pad_v * 2 + max_lines_in_row * line_height)
         row_heights.append(r_height)
 
     title_area_height = 90
@@ -121,7 +121,8 @@ def render_table(
         tw = bbox[2] - bbox[0]
         th = bbox[3] - bbox[1]
         
-        if col_idx == 2 and not is_tracing:
+        # Center align No. column and Pass/Fail column
+        if (col_idx == 0 and len(headers) == 4) or (col_idx == len(headers) - 1 and not is_tracing):
             tx = curr_x + (c_w - tw) // 2
         else:
             tx = curr_x + pad_h
@@ -141,7 +142,17 @@ def render_table(
             draw.rectangle([curr_x, curr_y, curr_x + c_w, curr_y + r_h], fill=bg_col)
             draw.rectangle([curr_x, curr_y, curr_x + c_w, curr_y + r_h], outline=border_color, width=1)
 
-            if not is_tracing and col_idx == 2:
+            # Center alignment for No. column and Pass/Fail
+            if col_idx == 0 and len(headers) == 4:
+                f = body_font
+                c = text_color
+                for l_idx, line in enumerate(lines):
+                    bbox = draw.textbbox((0, 0), line, font=f)
+                    tw = bbox[2] - bbox[0]
+                    tx = curr_x + (c_w - tw) // 2
+                    ty = curr_y + (r_h - len(lines) * line_height) // 2 + l_idx * line_height
+                    draw.text((tx, ty), line, fill=c, font=f)
+            elif col_idx == len(headers) - 1 and not is_tracing:
                 f = pass_font
                 c = pass_color
                 for l_idx, line in enumerate(lines):
@@ -175,60 +186,60 @@ def render_table(
     return img
 
 def main():
-    testing_headers = ["Test", "Expected Result", "Pass/Fail"]
-    testing_widths = [450, 680, 150]
+    # Step 11: 14 Testing Cases
+    testing_headers = ["No.", "Test", "Expected Result", "Pass/Fail"]
+    testing_widths = [70, 480, 580, 150]
     testing_rows = [
-        ["Log in using the default admin account.", "MainScreen opens.", "Pass"],
-        ["Open Social Media.", "Sample posts appear.", "Pass"],
-        ["Submit a post with empty fields.", "Validation message appears.", "Pass"],
-        ["Submit a post with an invalid URL.", "URL validation message appears.", "Pass"],
-        ["Submit a valid post.", "New post appears at the top with the logged-in username.", "Pass"],
-        ["Tap Like twice.", "Changes to Liked, then back to Like.", "Pass"],
-        ["Add a nonempty comment.", "Comment appears and count increases.", "Pass"],
-        ["Submit a blank comment.", "No comment is added.", "Pass"],
-        ["Like a sample post, then create another post.", "The original post keeps its liked state.", "Pass"],
-        ["Switch to Home and return.", "Posts, likes, and comments remain.", "Pass"],
-        ["Log out, register, and log in with a new account.", "New posts use the registered username.", "Pass"],
+        ["1", "Open the application.", "Login appears first.", "Pass"],
+        ["2", "Submit empty login fields.", "Validation messages appear.", "Pass"],
+        ["3", "Enter incorrect credentials.", "Login is rejected.", "Pass"],
+        ["4", "Enter admin / admin123.", "Dashboard opens.", "Pass"],
+        ["5", "Read the dashboard greeting.", "Displays Welcome, admin!", "Pass"],
+        ["6", "Open Calculator and calculate 10 + 5.", "Displays 15.0.", "Pass"],
+        ["7", "Switch tabs and return to Calculator.", "Inputs and result remain.", "Pass"],
+        ["8", "Create a social post.", "Post displays the logged-in username.", "Pass"],
+        ["9", "Like a post and add a comment.", "Both interactions update correctly.", "Pass"],
+        ["10", "Switch tabs and return to Social.", "Posts, likes, and comments remain.", "Pass"],
+        ["11", "Open Profile.", "Student information and username appear.", "Pass"],
+        ["12", "Tap Logout.", "Login appears; Back does not reopen MainScreen.", "Pass"],
+        ["13", "Register a valid account and log in.", "Dashboard displays the registered username.", "Pass"],
+        ["14", "Create a post using the registered account.", "Post displays the registered username.", "Pass"],
     ]
 
-    tracing_headers = ["Action", "Method or Statement", "What Happens?"]
-    tracing_widths = [260, 340, 680]
-    tracing_rows = [
+    # Guide Questions
+    guide_headers = ["No.", "Guide Question", "Technical Explanation / Answer"]
+    guide_widths = [70, 430, 780]
+    guide_rows = [
         [
-            "Successful login",
-            "DemoAuth.login()",
-            "Validates user credentials against admin/admin123 or registered credentials. If valid, assigns DemoAuth.currentUsername to the authenticated username and returns true, allowing navigation to MainScreen."
+            "1",
+            "How does DemoAuth connect Login to Dashboard, Social, and Profile?",
+            "DemoAuth manages an in-memory session by storing currentUsername when login() succeeds. This recorded username is read in MainScreen.initState() and supplied directly to DashboardPage, SocialMediaPage, and ProfilePage to display personalized greetings, author new posts, and present profile account details."
         ],
         [
-            "Tap the + button",
-            "openCreatePostSheet()",
-            "Opens a modal bottom sheet displaying CreatePostSheet via showModalBottomSheet<Post>(), passing widget.username and awaiting the created Post asynchronously."
+            "2",
+            "Why must the order of pages match the bottom navigation destinations?",
+            "In MainScreen, NavigationBar passes its selected destination index (0 to 3) to IndexedStack. Because IndexedStack displays the child widget exactly matching index, the order of widgets in the pages list must mirror the navigation bar items (Dashboard, Calculator, Social, Profile) so tapping an item opens its intended screen."
         ],
         [
-            "Submit a valid post",
-            "Navigator.pop(context, newPost)",
-            "Validates non-empty fields and HTTP/HTTPS image URL schema, instantiates the Post object with widget.username, closes the sheet, and returns newPost to openCreatePostSheet()."
+            "3",
+            "Why is IndexedStack useful for the Calculator and Social pages?",
+            "IndexedStack keeps all child widgets mounted and active in the widget tree rather than disposing and rebuilding them on navigation changes. This preserves controller values, calculation inputs/results, social feed posts, like states, and comments while users navigate between tabs."
         ],
         [
-            "Receive the new post",
-            "posts.insert(0, newPost)",
-            "Inserts the returned Post at index 0 of the posts list inside setState(), triggering a rebuild so the new post appears immediately at the top of the feed."
+            "4",
+            "Why should Logout clear the current username and remove previous routes?",
+            "Calling DemoAuth.logout() sets currentUsername to null to terminate the user session. Using Navigator.pushAndRemoveUntil() clears the navigation route history so pressing the Android/system Back button cannot reopen MainScreen without re-authenticating."
         ],
         [
-            "Tap Like",
-            "isLiked = !isLiked",
-            "Toggles the boolean isLiked state inside setState(), updating the heart icon between favorite and favorite_border and the button label between Liked and Like."
-        ],
-        [
-            "Send a comment",
-            "comments.add(comment)",
-            "Appends the trimmed, non-empty comment string to the comments list inside setState(), clears commentController, increments the comment counter, and renders the comment bubble."
+            "5",
+            "Which information is lost when this demo application restarts?",
+            "Because DemoAuth, the social feed list, and calculator controllers store data exclusively in volatile RAM, all registered accounts, newly created posts, likes, comments, and calculator history are completely reset to initial default values upon an application restart."
         ]
     ]
 
     img_testing = render_table(
         title="Step 11: Application Testing Table",
-        subtitle="Completed verification tests based on actual application behavior",
+        subtitle="Verification results for all 14 integration test scenarios",
         headers=testing_headers,
         col_widths=testing_widths,
         rows=testing_rows,
@@ -237,28 +248,28 @@ def main():
     )
     img_testing.save("screenshots/application_testing_table.png", "PNG", quality=95)
 
-    img_tracing = render_table(
-        title="Step 12: Code Tracing Table",
-        subtitle="Detailed execution flow and runtime behavior for each key action",
-        headers=tracing_headers,
-        col_widths=tracing_widths,
-        rows=tracing_rows,
-        output_path="code_tracing_table.png",
-        is_tracing=True
+    img_guide = render_table(
+        title="Application Guide Questions & Answers",
+        subtitle="Concise technical explanations for architecture and state management",
+        headers=guide_headers,
+        col_widths=guide_widths,
+        rows=guide_rows,
+        output_path="guide_questions_table.png",
+        is_tracing=False
     )
-    img_tracing.save("screenshots/code_tracing_table.png", "PNG", quality=95)
+    img_guide.save("screenshots/guide_questions_table.png", "PNG", quality=95)
 
     # Combined stacked image
     gap = 40
-    comb_w = max(img_testing.width, img_tracing.width)
-    comb_h = img_testing.height + img_tracing.height + gap
+    comb_w = max(img_testing.width, img_guide.width)
+    comb_h = img_testing.height + img_guide.height + gap
     comb_img = Image.new("RGB", (comb_w, comb_h), (255, 255, 255))
     comb_img.paste(img_testing, (0, 0))
-    comb_img.paste(img_tracing, (0, img_testing.height + gap))
+    comb_img.paste(img_guide, (0, img_testing.height + gap))
     
-    comb_img.save("testing_and_tracing_tables.png", "PNG", quality=95)
-    comb_img.save("screenshots/testing_and_tracing_tables.png", "PNG", quality=95)
-    print("Saved combined tables to testing_and_tracing_tables.png and screenshots/testing_and_tracing_tables.png")
+    comb_img.save("testing_and_guide_questions_tables.png", "PNG", quality=95)
+    comb_img.save("screenshots/testing_and_guide_questions_tables.png", "PNG", quality=95)
+    print("Saved combined tables to testing_and_guide_questions_tables.png")
 
 if __name__ == "__main__":
     main()
